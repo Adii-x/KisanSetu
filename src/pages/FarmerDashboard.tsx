@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, DragEvent, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Package, IndianRupee, TrendingUp, ShoppingBag, X } from 'lucide-react';
@@ -12,6 +12,10 @@ const FarmerDashboard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const placeholderImages = mockProducts.map(p => p.image);
 
   const stats = [
     { icon: IndianRupee, label: t('analytics.totalSales'), value: '₹31,000', color: 'text-primary' },
@@ -28,6 +32,7 @@ const FarmerDashboard = () => {
   const handleEdit = (product: Product) => {
     setEditProduct(product);
     setForm({ name: product.name, price: String(product.price), quantity: String(product.quantity), category: product.category, unit: product.unit });
+    setImagePreview(product.image || null);
     setShowAddModal(true);
   };
 
@@ -37,7 +42,15 @@ const FarmerDashboard = () => {
       return;
     }
     if (editProduct) {
-      setProducts(prev => prev.map(p => p.id === editProduct.id ? { ...p, name: form.name, price: Number(form.price), quantity: Number(form.quantity), category: form.category, unit: form.unit } : p));
+      setProducts(prev => prev.map(p => p.id === editProduct.id ? {
+        ...p,
+        name: form.name,
+        price: Number(form.price),
+        quantity: Number(form.quantity),
+        category: form.category,
+        unit: form.unit,
+        image: imagePreview || p.image,
+      } : p));
       toast.success(t('dashboard.productUpdated'));
     } else {
       const newProduct: Product = {
@@ -46,7 +59,7 @@ const FarmerDashboard = () => {
         price: Number(form.price),
         quantity: Number(form.quantity),
         category: form.category,
-        image: '🌾',
+        image: imagePreview || placeholderImages[Math.floor(Math.random() * placeholderImages.length)] || '🌾',
         farmer: 'You',
         unit: form.unit,
       };
@@ -56,6 +69,43 @@ const FarmerDashboard = () => {
     setShowAddModal(false);
     setEditProduct(null);
     setForm({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' });
+    setImagePreview(null);
+  };
+
+  const handleImageFile = (file: File | null) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (typeof e.target?.result === 'string') {
+        setImagePreview(e.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    handleImageFile(file || null);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    handleImageFile(file);
   };
 
   const farmerOrders = mockOrders.slice(0, 3);
@@ -98,8 +148,20 @@ const FarmerDashboard = () => {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {products.map((product, i) => (
-              <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card p-4">
-                <div className="text-4xl mb-3">{product.image}</div>
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="glass-card p-4 flex flex-col"
+              >
+                <div className="mb-3 rounded-xl overflow-hidden">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-32 object-cover"
+                  />
+                </div>
                 <h3 className="font-semibold text-foreground">{product.name}</h3>
                 <p className="text-primary font-bold">₹{product.price}/{product.unit}</p>
                 <p className="text-xs text-muted-foreground">{t('marketplace.available')}: {product.quantity} {product.unit}</p>
@@ -179,6 +241,32 @@ const FarmerDashboard = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <input value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder={t('dashboard.price')} type="number" className="w-full bg-muted/50 text-foreground px-4 py-3 rounded-xl border-none outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30" />
                   <input value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} placeholder={t('marketplace.quantity')} type="number" className="w-full bg-muted/50 text-foreground px-4 py-3 rounded-xl border-none outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30" />
+                </div>
+                <div
+                  className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/30 bg-muted/30'}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => document.getElementById('product-image-input')?.click()}
+                >
+                  <input
+                    id="product-image-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileInputChange}
+                  />
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    {t('dashboard.uploadImage') || 'Upload product image'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Drag & drop an image here, or click to browse
+                  </p>
+                  {imagePreview && (
+                    <div className="mt-2 flex justify-center">
+                      <img src={imagePreview} alt="Preview" className="h-20 w-28 object-cover rounded-lg shadow-sm" />
+                    </div>
+                  )}
                 </div>
                 <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="w-full bg-muted/50 text-foreground px-4 py-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/30">
                   {['vegetables', 'fruits', 'grains', 'spices', 'dairy'].map(c => (

@@ -42,9 +42,9 @@ const HeroSection = () => {
               <Sprout className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">KisanSetu</span>
             </div>
-            <h2 className="px-3 sm:px-0 text-3xl md:text-5xl lg:text-5xl font-extrabold leading-snug md:leading-tight mb-6 gradient-text break-words">
+            <h1 className="px-3 sm:px-0 text-5xl md:text-5xl lg:text-5xl font-extrabold leading-snug md:leading-tight mb-6 gradient-text break-words">
               {t('hero.headline')}
-            </h2>
+            </h1>
             <p className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed">
               {t('hero.subtext')}
             </p>

@@ -28,7 +28,12 @@ type SpeechRecognitionWindow = Window & {
   webkitSpeechRecognition?: SpeechRecognitionConstructorLike;
 };
 
-const VoiceAssistant = () => {
+type VoiceAssistantProps = {
+  mode?: 'command' | 'chat';
+  onTranscript?: (text: string) => void;
+};
+
+const VoiceAssistant = ({ mode = 'command', onTranscript }: VoiceAssistantProps) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [listening, setListening] = useState(false);
@@ -89,6 +94,11 @@ const VoiceAssistant = () => {
     recognition.onerror = () => { setListening(false); toast.error('Voice recognition error'); };
     recognition.onresult = (event: SpeechRecognitionEventLike) => {
       const transcript = event.results[0][0].transcript;
+      if (mode === 'chat' && onTranscript) {
+        onTranscript(transcript);
+        toast.info(`🎙️ "${transcript}"`);
+        return;
+      }
       processCommand(transcript);
     };
     recognition.start();

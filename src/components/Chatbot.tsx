@@ -39,16 +39,19 @@ const Chatbot = () => {
     return t('chatbot.fallback');
   };
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const userMsg: Message = { id: Date.now().toString(), text: input, isBot: false };
+  const handleSendText = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const userMsg: Message = { id: Date.now().toString(), text: trimmed, isBot: false };
     setMessages(prev => [...prev, userMsg]);
-    const response = getResponse(input);
+    const response = getResponse(trimmed);
     setInput('');
     setTimeout(() => {
       setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), text: response, isBot: true }]);
     }, 500);
   };
+
+  const handleSend = () => handleSendText(input);
 
   return (
     <>
@@ -105,7 +108,7 @@ const Chatbot = () => {
 
             {/* Input */}
             <div className="p-3 border-t border-border flex items-center gap-2">
-              <VoiceAssistant />
+              <VoiceAssistant mode="chat" onTranscript={handleSendText} />
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

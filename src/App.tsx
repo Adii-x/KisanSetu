@@ -6,7 +6,6 @@ import { CartProvider } from "@/context/CartContext";
 import { UserRoleProvider } from "@/context/UserRoleContext";
 import Navbar from "@/components/Navbar";
 import Chatbot from "@/components/Chatbot";
-import VoiceAssistant from "@/components/VoiceAssistant";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Community from "./pages/Community";
@@ -40,7 +39,6 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Chatbot />
-            <VoiceAssistant />
           </BrowserRouter>
         </UserRoleProvider>
       </CartProvider>

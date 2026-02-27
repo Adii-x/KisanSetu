@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import VoiceAssistant from './VoiceAssistant';
 
 interface Message {
   id: string;
@@ -118,6 +119,7 @@ const Chatbot = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {open && <VoiceAssistant />}
     </>
   );
 };

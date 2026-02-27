@@ -1,0 +1,226 @@
+{
+  "nav": {
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "community": "Community",
+    "analytics": "Analytics",
+    "orders": "Orders",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register",
+    "profile": "Profile"
+  },
+  "hero": {
+    "headline": "Empowering Farmers Digitally",
+    "subtext": "Connect directly with buyers, grow your business, and join a thriving farming community — all in one place.",
+    "explore": "Explore Marketplace",
+    "join": "Join Community"
+  },
+  "marketplace": {
+    "title": "Fresh From The Farm",
+    "subtitle": "Browse and buy fresh produce directly from local farmers",
+    "filter": "Filter by Category",
+    "all": "All",
+    "vegetables": "Vegetables",
+    "fruits": "Fruits",
+    "grains": "Grains",
+    "spices": "Spices",
+    "dairy": "Dairy",
+    "addToCart": "Add to Cart",
+    "perKg": "per kg",
+    "available": "Available",
+    "viewDetails": "View Details",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "emptyCart": "Your cart is empty",
+    "total": "Total",
+    "quantity": "Quantity"
+  },
+  "community": {
+    "title": "Farmer Community",
+    "subtitle": "Share knowledge, discuss market prices, and connect with fellow farmers",
+    "createPost": "Create Post",
+    "writePost": "What's on your mind?",
+    "post": "Post",
+    "like": "Like",
+    "comment": "Comment",
+    "share": "Share",
+    "categories": {
+      "all": "All",
+      "crop": "Crop Discussion",
+      "prices": "Market Prices",
+      "schemes": "Govt. Schemes",
+      "tips": "Farming Tips"
+    }
+  },
+  "analytics": {
+    "title": "Monthly Analytics",
+    "subtitle": "Track your farm's performance",
+    "totalSales": "Total Sales",
+    "totalOrders": "Total Orders",
+    "revenue": "Revenue",
+    "topProduct": "Top Product",
+    "growth": "Growth",
+    "thisMonth": "This Month"
+  },
+  "orders": {
+    "title": "My Orders",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "outForDelivery": "Out for Delivery",
+      "delivered": "Delivered"
+    },
+    "orderDate": "Order Date",
+    "trackOrder": "Track Order"
+  },
+  "chatbot": {
+    "title": "Krishi Assistant",
+    "placeholder": "Ask me anything...",
+    "greeting": "Hello! I'm your Krishi Assistant. How can I help you today?",
+    "pricing": "You can view current prices on our Marketplace page. Prices are set directly by farmers.",
+    "delivery": "We offer delivery tracking. Orders go through: Pending → Accepted → Out for Delivery → Delivered.",
+    "payment": "We support secure online payments. You can pay using UPI, cards, or net banking at checkout.",
+    "sell": "To sell your produce: Register as a farmer, go to your Dashboard, and click 'Add Product'.",
+    "schemes": "Check the Community section under 'Govt. Schemes' for the latest government agricultural programs.",
+    "support": "You can reach our support team at support@smartkrishi.com or call 1800-KRISHI.",
+    "fallback": "I'm sorry, I didn't understand that. Please contact our support team for assistance."
+  },
+  "voice": {
+    "listening": "Listening...",
+    "speak": "Tap the mic to speak"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "farmer": "Farmer",
+    "buyer": "Buyer",
+    "selectRole": "I am a...",
+    "loginSuccess": "Welcome back!",
+    "registerSuccess": "Account created successfully!"
+  },
+  "features": {
+    "title": "Why KisanSetu?",
+    "directTrade": "Direct Trade",
+    "directTradeDesc": "Sell directly to buyers without middlemen",
+    "community": "Community",
+    "communityDesc": "Connect with fellow farmers and share knowledge",
+    "analytics": "Smart Analytics",
+    "analyticsDesc": "Track your sales and growth with powerful charts",
+    "multilingual": "Multilingual",
+    "multilingualDesc": "Use the app in English, Hindi, or Marathi"
+  },
+  "landing": {
+    "how": {
+      "title": "How KisanSetu Works",
+      "subtitle": "Simple. Transparent. Direct.",
+      "step1": {
+        "title": "Farmers List Produce",
+        "desc": "Farmers upload crops with price, quantity and availability."
+      },
+      "step2": {
+        "title": "Buyers Place Orders",
+        "desc": "Restaurants, retailers and consumers order directly."
+      },
+      "step3": {
+        "title": "Track & Receive",
+        "desc": "Track delivery status from dispatch to doorstep."
+      }
+    },
+    "why": {
+      "title": "Why Farmers & Buyers Trust Us",
+      "card1": {
+        "title": "Transparent Pricing",
+        "desc": "No hidden commissions or middlemen."
+      },
+      "card2": {
+        "title": "Better Profits for Farmers",
+        "desc": "Direct selling increases earnings."
+      },
+      "card3": {
+        "title": "Fresh & Verified Produce",
+        "desc": "Quality‑checked listings."
+      },
+      "card4": {
+        "title": "Local Language Support",
+        "desc": "Available in English, Hindi, and Marathi."
+      }
+    },
+    "split": {
+      "title": "Everything You Need in One Platform",
+      "marketplace": "Marketplace",
+      "analytics": "Monthly analytics",
+      "community": "Community discussions",
+      "voice": "Voice assistance",
+      "checkout": "Secure checkout",
+      "delivery": "Delivery tracking"
+    },
+    "market": {
+      "title": "Today's Featured Produce",
+      "tomato": "Tomato",
+      "wheat": "Wheat",
+      "onion": "Onion",
+      "rice": "Rice",
+      "inStock": "In stock",
+      "limited": "Limited stock"
+    },
+    "communityPreview": {
+      "title": "Farmer Community Highlights",
+      "post1": "Best fertilizer for wheat?",
+      "post2": "Market price update – Nashik",
+      "post3": "New government scheme announced"
+    },
+    "analyticsPreview": {
+      "title": "Track Your Growth Monthly"
+    },
+    "testimonials": {
+      "title": "What Our Farmers Say",
+      "person1": {
+        "name": "Ramesh, Nashik",
+        "quote": "KisanSetu helped me get better prices without middlemen."
+      },
+      "person2": {
+        "name": "Savita, Pune",
+        "quote": "Now I can track my monthly sales and plan my crops better."
+      },
+      "person3": {
+        "name": "Imran, Nagpur",
+        "quote": "Easy to use in my own language and buyers reach me directly."
+      }
+    },
+    "finalCta": {
+      "title": "Ready to Sell Smarter?",
+      "farmer": "Join as Farmer",
+      "buyer": "Start Buying"
+    },
+    "footer": {
+      "tagline": "Building a direct, transparent bridge between farms and buyers.",
+      "quickLinks": "Quick Links",
+      "contact": "Contact",
+      "follow": "Follow Us",
+      "languageHint": "Use the language switcher in the header to change app language.",
+      "copy": "© KisanSetu. All rights reserved."
+    }
+  },
+  "dashboard": {
+    "title": "Farmer Dashboard",
+    "subtitle": "Manage your products, orders, and revenue",
+    "myProducts": "My Products",
+    "addProduct": "Add Product",
+    "editProduct": "Edit Product",
+    "productName": "Product Name",
+    "price": "Price (₹)",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "productAdded": "Product added successfully!",
+    "productUpdated": "Product updated successfully!",
+    "productDeleted": "Product deleted!",
+    "fillAll": "Please fill all fields",
+    "recentOrders": "Recent Orders",
+    "manageOrders": "Manage Orders"
+  }
+}

@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 100 20% 95%;
+    --foreground: 130 30% 12%;
+
+    --card: 120 15% 97%;
+    --card-foreground: 130 30% 12%;
+
+    --popover: 100 20% 95%;
+    --popover-foreground: 130 30% 12%;
+
+    --primary: 122 39% 33%;
+    --primary-foreground: 100 40% 97%;
+
+    --secondary: 122 38% 55%;
+    --secondary-foreground: 100 40% 97%;
+
+    --muted: 110 15% 90%;
+    --muted-foreground: 120 10% 40%;
+
+    --accent: 85 50% 50%;
+    --accent-foreground: 130 30% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 15% 85%;
+    --input: 120 15% 85%;
+    --ring: 122 39% 33%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 120 15% 97%;
+    --sidebar-foreground: 130 30% 12%;
+    --sidebar-primary: 122 39% 33%;
+    --sidebar-primary-foreground: 100 40% 97%;
+    --sidebar-accent: 120 20% 92%;
+    --sidebar-accent-foreground: 130 30% 12%;
+    --sidebar-border: 120 15% 85%;
+    --sidebar-ring: 122 39% 33%;
+
+    /* Custom tokens */
+    --glass-bg: rgba(255, 255, 255, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px rgba(46, 125, 50, 0.1);
+    --gradient-hero: linear-gradient(135deg, hsl(122 39% 33%), hsl(85 50% 50%));
+    --gradient-soft: linear-gradient(180deg, hsl(100 20% 95%), hsl(120 20% 92%));
+    --gradient-card: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1));
+    --glow-primary: 0 0 20px hsla(122, 39%, 33%, 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    background: linear-gradient(180deg, hsl(100 20% 95%) 0%, hsl(120 20% 92%) 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius);
+  }
+
+  .glass-navbar {
+    background: rgba(245, 247, 242, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 4px 20px rgba(46, 125, 50, 0.06);
+  }
+
+  .gradient-text {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-glow {
+    box-shadow: var(--glow-primary);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+  }
+
+  .btn-glow:hover {
+    box-shadow: 0 0 30px hsla(122, 39%, 33%, 0.5);
+    transform: translateY(-2px);
+  }
+
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 10px hsla(122, 39%, 33%, 0.2); }
+    50% { box-shadow: 0 0 25px hsla(122, 39%, 33%, 0.4); }
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .mobile-bottom-nav {
+    background: rgba(245, 247, 242, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+  }
+}

@@ -78,7 +78,7 @@
   "chatbot": {
     "title": "Krishi Assistant",
     "placeholder": "Ask me anything...",
-    "greeting": "Namaste! I'm your Krishi Assistant. How can I help you today?",
+    "greeting": "Hello! I'm your Krishi Assistant. How can I help you today?",
     "pricing": "You can view current prices on our Marketplace page. Prices are set directly by farmers.",
     "delivery": "We offer delivery tracking. Orders go through: Pending → Accepted → Out for Delivery → Delivered.",
     "payment": "We support secure online payments. You can pay using UPI, cards, or net banking at checkout.",

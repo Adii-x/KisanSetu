@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, X, Sprout, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
 import { useUserRole } from '@/context/UserRoleContext';
@@ -12,7 +12,8 @@ type Role = 'farmer' | 'buyer';
 const Navbar = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { role: contextRole, setRole } = useUserRole();
+  const location = useLocation();
+  const { setRole } = useUserRole();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -88,6 +89,10 @@ const Navbar = () => {
     user?.email ||
     '';
 
+  if (location.pathname.startsWith('/farmer') || location.pathname.startsWith('/buyer')) {
+    return null;
+  }
+
   return (
     <nav className="glass-navbar sticky top-0 z-50 px-4 py-3">
       <div className="container mx-auto flex items-center justify-between">
@@ -109,7 +114,7 @@ const Navbar = () => {
                 {displayName}
               </span>
               <Link
-                to={role === 'farmer' ? '/farmer-dashboard' : '/buyer-dashboard'}
+                to={role === 'farmer' ? '/farmer/dashboard' : '/buyer/dashboard'}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
               >
                 <LayoutDashboard className="h-4 w-4" />

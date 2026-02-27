@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, DragEvent, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Package, IndianRupee, TrendingUp, ShoppingBag, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, IndianRupee, ShoppingBag, Package, TrendingUp, CreditCard } from 'lucide-react';
 import { Product, mockOrders, monthlyData } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
@@ -107,13 +107,6 @@ const FarmerDashboard = () => {
 
     void checkAuth();
   }, [navigate, setRole, fetchProducts]);
-
-  const stats = [
-    { icon: IndianRupee, label: t('analytics.totalSales'), value: '₹31,000', color: 'text-primary' },
-    { icon: ShoppingBag, label: t('analytics.totalOrders'), value: '18', color: 'text-secondary' },
-    { icon: Package, label: t('dashboard.myProducts'), value: String(products.length), color: 'text-krishi-wheat' },
-    { icon: TrendingUp, label: t('analytics.growth'), value: '+24%', color: 'text-krishi-leaf' },
-  ];
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from('products').delete().eq('id', id);
@@ -228,8 +221,6 @@ const FarmerDashboard = () => {
     handleImageFile(file);
   };
 
-  const farmerOrders = mockOrders.slice(0, 3);
-
   if (authLoading) {
     return (
       <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -239,123 +230,176 @@ const FarmerDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen">
+    <div className="container mx-auto px-4 py-8 min-h-screen max-w-6xl">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold gradient-text mb-1">{t('dashboard.title')}</h1>
-        <p className="text-muted-foreground mb-8">{t('dashboard.subtitle')}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+          <div>
+            <h1 className="text-4xl font-bold gradient-text tracking-tight">{t('dashboard.title')}</h1>
+            <p className="text-muted-foreground mt-2 text-lg">{t('dashboard.subtitle')}</p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => { setEditProduct(null); setForm({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' }); setShowAddModal(true); }}
+            className="shrink-0 inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl text-base font-semibold btn-glow shadow-lg"
+          >
+            <Plus className="h-5 w-5" /> {t('dashboard.addProduct')}
+          </motion.button>
+        </div>
 
-        {/* Stats */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, i) => (
-            <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card p-5">
+        <section>
+          {productsLoading ? (
+            <p className="text-muted-foreground text-lg">Loading products…</p>
+          ) : products.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-12 text-center">
+              <p className="text-muted-foreground text-lg mb-2">No products yet.</p>
+              <p className="text-sm text-muted-foreground mb-4">Add your first product to start selling.</p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setEditProduct(null); setForm({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' }); setShowAddModal(true); }}
+                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-medium"
+              >
+                {t('dashboard.addProduct')}
+              </motion.button>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="rounded-2xl bg-card border border-border shadow-md overflow-hidden flex flex-col hover:shadow-lg transition-shadow"
+                >
+                  <div className="aspect-[4/3] overflow-hidden bg-muted/30">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PLACEHOLDER_IMAGE; }}
+                    />
+                  </div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-2">{product.name}</h3>
+                    <p className="text-xl font-bold text-primary mt-1">₹{product.price}<span className="text-sm font-normal text-muted-foreground">/{product.unit}</span></p>
+                    <p className="text-sm text-muted-foreground mt-2">{t('marketplace.available')}: {product.quantity} {product.unit}</p>
+                    <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                      <button onClick={() => handleEdit(product)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                        <Edit2 className="h-4 w-4" /> {t('dashboard.edit')}
+                      </button>
+                      <button onClick={() => void handleDelete(product.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                        <Trash2 className="h-4 w-4" /> {t('dashboard.delete')}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Stats + Payments + Analytics + Orders */}
+        <div className="mt-12 space-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <IndianRupee className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{t('analytics.totalSales')}</p>
+                  <p className="text-xl font-bold text-foreground">₹31,000</p>
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* My Products */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">{t('dashboard.myProducts')}</h2>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => { setEditProduct(null); setForm({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' }); setShowAddModal(true); }}
-              className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 btn-glow"
-            >
-              <Plus className="h-4 w-4" /> {t('dashboard.addProduct')}
-            </motion.button>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {productsLoading ? (
-              <p className="text-muted-foreground col-span-full">Loading products…</p>
-            ) : (
-              products.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass-card p-4 flex flex-col"
-              >
-                <div className="mb-3 rounded-xl overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-32 object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PLACEHOLDER_IMAGE; }}
-                  />
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ShoppingBag className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground">{product.name}</h3>
-                <p className="text-primary font-bold">₹{product.price}/{product.unit}</p>
-                <p className="text-xs text-muted-foreground">{t('marketplace.available')}: {product.quantity} {product.unit}</p>
-                <div className="flex gap-2 mt-3">
-                  <button onClick={() => handleEdit(product)} className="flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                    <Edit2 className="h-3 w-3" /> {t('dashboard.edit')}
-                  </button>
-                  <button onClick={() => void handleDelete(product.id)} className="flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
-                    <Trash2 className="h-3 w-3" /> {t('dashboard.delete')}
-                  </button>
+                <div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.totalOrders')}</p>
+                  <p className="text-xl font-bold text-foreground">18</p>
                 </div>
-              </motion.div>
-            ))
-            )}
-          </div>
-        </div>
-
-        {/* Recent Orders & Analytics */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Recent Orders */}
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">{t('dashboard.recentOrders')}</h2>
-            <div className="space-y-3">
-              {farmerOrders.map(order => (
-                <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
-                  <div>
-                    <p className="font-medium text-foreground text-sm">{order.product}</p>
-                    <p className="text-xs text-muted-foreground">{order.buyer} • {order.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-primary text-sm">₹{order.price}</p>
-                    <p className="text-xs text-muted-foreground">{t(`orders.status.${order.status}`)}</p>
-                  </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Package className="h-5 w-5 text-primary" />
                 </div>
-              ))}
+                <div>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.myProducts')}</p>
+                  <p className="text-xl font-bold text-foreground">{products.length}</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.growth')}</p>
+                  <p className="text-xl font-bold text-foreground">+24%</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Track Your Growth Monthly (farmer-only analytics preview) */}
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-2">
-              {t('landing.analyticsPreview.title')}
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              Payment &amp; earnings
             </h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              {t('analytics.subtitle')}
+            <p className="text-sm text-muted-foreground mb-4">
+              View your payouts, bank details, and transaction history. Payments are processed securely after order delivery.
             </p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(120, 15%, 85%)" />
-                <XAxis dataKey="month" stroke="hsl(120, 10%, 40%)" fontSize={12} />
-                <YAxis stroke="hsl(120, 10%, 40%)" fontSize={12} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'rgba(245, 247, 242, 0.95)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    borderRadius: '12px',
-                    backdropFilter: 'blur(10px)',
-                  }}
-                />
-                <Bar dataKey="sales" fill="hsl(122, 39%, 33%)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="inline-flex items-center gap-2 rounded-xl bg-muted/50 px-4 py-2 text-sm text-muted-foreground">
+              <span>Payments integration coming soon.</span>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground mb-4">{t('dashboard.recentOrders')}</h2>
+              <div className="space-y-3">
+                {mockOrders.slice(0, 4).map(order => (
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                    <div>
+                      <p className="font-medium text-foreground">{order.product}</p>
+                      <p className="text-xs text-muted-foreground">{order.buyer} · {order.date}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-primary">₹{order.price}</p>
+                      <p className="text-xs text-muted-foreground">{t(`orders.status.${order.status}`)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground mb-2">{t('landing.analyticsPreview.title')}</h2>
+              <p className="text-sm text-muted-foreground mb-4">{t('analytics.subtitle')}</p>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(120, 15%, 85%)" />
+                  <XAxis dataKey="month" stroke="hsl(120, 10%, 40%)" fontSize={12} />
+                  <YAxis stroke="hsl(120, 10%, 40%)" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'rgba(245, 247, 242, 0.95)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '12px',
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  />
+                  <Bar dataKey="sales" fill="hsl(122, 39%, 33%)" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </motion.div>

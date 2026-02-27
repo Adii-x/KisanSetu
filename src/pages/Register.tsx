@@ -11,7 +11,7 @@ type Role = 'farmer' | 'buyer';
 
 /**
  * Single register page. User selects role (farmer/buyer), then we signUp and insert
- * into public.profiles. Redirect to /farmer-dashboard or /buyer-dashboard.
+ * into public.profiles. Redirect to /farmer/dashboard or /buyer-dashboard.
  */
 const Register = () => {
   const { t } = useTranslation();
@@ -67,7 +67,7 @@ const Register = () => {
 
       setRole(selectedRole);
       toast.success(t('auth.registerSuccess'));
-      navigate(selectedRole === 'farmer' ? '/farmer-dashboard' : '/buyer-dashboard');
+      navigate(selectedRole === 'farmer' ? '/farmer/dashboard' : '/buyer/dashboard');
     } catch (err: unknown) {
       console.error('Unexpected signup error:', err);
       toast.error('Something went wrong. Please try again.');

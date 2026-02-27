@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Eye, X, Plus, Minus, Filter, ChevronDown, Star } from 'lucide-react';
-import { mockProducts, Product } from '@/data/mockData';
+import { Product } from '@/data/mockData';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabaseClient';
 
 type LocationFilter = 'nearby' | 'district' | 'state' | 'all';
 
@@ -21,27 +22,44 @@ type EnhancedProduct = Product & {
   updatedAt: string;
 };
 
-const RAW_PRODUCTS: EnhancedProduct[] = mockProducts.map((p, index) => {
-  const locationOptions: LocationFilter[] = ['nearby', 'district', 'state', 'all'];
-  const baseRating = [4.5, 4.2, 4.8, 3.9, 4.0, 4.6, 4.1, 3.7, 4.3][index % 9];
+type ProductRow = {
+  id: string;
+  farmer_id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  category: string | null;
+  unit: string | null;
+  image_url: string | null;
+  created_at: string;
+};
 
+const DEFAULT_PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400';
+const LOCATION_OPTIONS: LocationFilter[] = ['nearby', 'district', 'state', 'all'];
+
+function mapRowToEnhancedProduct(row: ProductRow, index: number): EnhancedProduct {
+  const rating = [4.5, 4.2, 4.8, 3.9, 4.0, 4.6, 4.1, 3.7, 4.3][index % 9];
   return {
-    ...p,
-    rating: baseRating,
+    id: row.id,
+    name: row.name,
+    price: Number(row.price),
+    quantity: row.quantity ?? 0,
+    category: row.category ?? 'vegetables',
+    image: row.image_url ?? DEFAULT_PLACEHOLDER_IMAGE,
+    farmer: 'Farmer',
+    unit: row.unit ?? 'kg',
+    rating,
     reviews: 20 + index * 5,
-    location: locationOptions[index % locationOptions.length],
-    isOrganic: /organic/i.test(p.name),
-    isSeasonal: /mango|tomato|onion|banana/i.test(p.name),
+    location: LOCATION_OPTIONS[index % LOCATION_OPTIONS.length],
+    isOrganic: /organic/i.test(row.name),
+    isSeasonal: /mango|tomato|onion|banana/i.test(row.name),
     discount: index % 3 === 0 ? 10 + (index % 2) * 5 : undefined,
-    isBulkAvailable: p.quantity >= 400,
+    isBulkAvailable: (row.quantity ?? 0) >= 400,
     popularity: 100 - index * 5,
-    createdAt: new Date(2026, 1, 20 + index).toISOString(),
-    updatedAt: new Date(2026, 1, 25 + index).toISOString(),
+    createdAt: row.created_at,
+    updatedAt: row.created_at,
   };
-});
-
-const MIN_PRICE = Math.min(...RAW_PRODUCTS.map(p => p.price));
-const MAX_PRICE = Math.max(...RAW_PRODUCTS.map(p => p.price));
+}
 
 type SortOption =
   | 'price-asc'
@@ -67,12 +85,22 @@ const MarketplacePage = () => {
   const { t } = useTranslation();
   const { addItem, items, totalItems, totalPrice, updateQuantity, removeItem } = useCart();
 
+  const [marketplaceProducts, setMarketplaceProducts] = useState<EnhancedProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+
   const [selectedProduct, setSelectedProduct] = useState<EnhancedProduct | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  const priceBounds = useMemo(() => {
+    if (marketplaceProducts.length === 0) return { min: 0, max: 1000 };
+    const prices = marketplaceProducts.map(p => p.price);
+    return { min: Math.min(...prices), max: Math.max(...prices) };
+  }, [marketplaceProducts]);
+
   const [categories, setCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([MIN_PRICE, MAX_PRICE]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [location, setLocation] = useState<LocationFilter>('all');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [minRating, setMinRating] = useState<number | null>(null);
@@ -80,13 +108,35 @@ const MarketplacePage = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
+  const fetchProducts = useCallback(async () => {
+    setProductsLoading(true);
+    setProductsError(null);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Marketplace fetch error:', error);
+      setProductsError(error.message ?? 'Failed to load products.');
+      setMarketplaceProducts([]);
+    } else {
+      setMarketplaceProducts((data ?? []).map((row: ProductRow, i) => mapRowToEnhancedProduct(row, i)));
+    }
+    setProductsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchProducts();
+  }, [fetchProducts]);
+
   useEffect(() => {
     const raw = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
     if (!raw) return;
     try {
       const parsed = JSON.parse(raw) as StoredFilters;
       setCategories(parsed.categories || []);
-      setPriceRange(parsed.priceRange || [MIN_PRICE, MAX_PRICE]);
+      setPriceRange(parsed.priceRange || [0, 1000]);
       setLocation(parsed.location || 'all');
       setInStockOnly(parsed.inStockOnly || false);
       setMinRating(parsed.minRating ?? null);
@@ -143,7 +193,7 @@ const MarketplacePage = () => {
 
   const handleClearAll = () => {
     setCategories([]);
-    setPriceRange([MIN_PRICE, MAX_PRICE]);
+    setPriceRange([priceBounds.min, priceBounds.max]);
     setLocation('all');
     setInStockOnly(false);
     setMinRating(null);
@@ -153,7 +203,7 @@ const MarketplacePage = () => {
   };
 
   const filteredProducts = useMemo(() => {
-    let list = [...RAW_PRODUCTS];
+    let list = [...marketplaceProducts];
 
     if (categories.length) {
       list = list.filter(p => {
@@ -214,7 +264,7 @@ const MarketplacePage = () => {
     }
 
     return list;
-  }, [categories, priceRange, location, inStockOnly, minRating, sortBy, debouncedSearch]);
+  }, [marketplaceProducts, categories, priceRange, location, inStockOnly, minRating, sortBy, debouncedSearch]);
 
   const activeFilterChips = useMemo(() => {
     const chips: { key: string; label: string; onRemove: () => void }[] = [];
@@ -242,11 +292,11 @@ const MarketplacePage = () => {
       }
     });
 
-    if (priceRange[0] !== MIN_PRICE || priceRange[1] !== MAX_PRICE) {
+    if (priceRange[0] !== priceBounds.min || priceRange[1] !== priceBounds.max) {
       chips.push({
         key: 'price',
         label: `₹${priceRange[0]}–₹${priceRange[1]}`,
-        onRemove: () => setPriceRange([MIN_PRICE, MAX_PRICE]),
+        onRemove: () => setPriceRange([priceBounds.min, priceBounds.max]),
       });
     }
 
@@ -289,7 +339,7 @@ const MarketplacePage = () => {
     }
 
     return chips;
-  }, [categories, priceRange, location, inStockOnly, minRating, search]);
+  }, [categories, priceRange, priceBounds, location, inStockOnly, minRating, search]);
 
   const resultCount = filteredProducts.length;
 
@@ -349,16 +399,16 @@ const MarketplacePage = () => {
           <div className="space-y-2">
             <input
               type="range"
-              min={MIN_PRICE}
-              max={MAX_PRICE}
+              min={priceBounds.min}
+              max={priceBounds.max}
               value={priceRange[0]}
               onChange={(e) => handlePriceChange(0, Number(e.target.value))}
               className="w-full accent-emerald-600"
             />
             <input
               type="range"
-              min={MIN_PRICE}
-              max={MAX_PRICE}
+              min={priceBounds.min}
+              max={priceBounds.max}
               value={priceRange[1]}
               onChange={(e) => handlePriceChange(1, Number(e.target.value))}
               className="w-full accent-emerald-600"
@@ -515,7 +565,34 @@ const MarketplacePage = () => {
               </button>
             </div>
 
-            {resultCount === 0 ? (
+            {productsLoading ? (
+              <div className="rounded-2xl border border-border bg-card/50 p-12 text-center">
+                <p className="text-muted-foreground text-lg">Loading products…</p>
+              </div>
+            ) : productsError ? (
+              <div className="glass-card rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-4">
+                <p className="font-semibold text-foreground">Could not load products.</p>
+                <p className="text-sm text-muted-foreground">{productsError}</p>
+                <button
+                  onClick={() => void fetchProducts()}
+                  className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : resultCount === 0 && marketplaceProducts.length === 0 ? (
+              <div className="glass-card rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center">
+                  <Filter className="h-10 w-10 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground mb-1">No products listed yet</p>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    Farmers haven&apos;t added any products to the marketplace yet, or the products table may be empty. If you&apos;ve set up Supabase, ensure the &quot;products&quot; table has RLS policies that allow buyers to select rows (e.g. run the script in <code className="text-xs bg-muted px-1 rounded">supabase/products_rls_buyers.sql</code>).
+                  </p>
+                </div>
+              </div>
+            ) : resultCount === 0 ? (
               <div className="glass-card rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-4">
                 <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center">
                   <Filter className="h-10 w-10 text-emerald-500" />

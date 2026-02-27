@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 /**
  * Single login page. Role is always fetched from public.profiles after login.
- * Redirects: farmer → /farmer-dashboard, buyer → /buyer-dashboard.
+ * Redirects: farmer → /farmer/dashboard, buyer → /buyer-dashboard.
  * If no profile → redirect to /register with error toast.
  */
 const Login = () => {
@@ -64,7 +64,7 @@ const Login = () => {
       const role = profile.role === 'farmer' || profile.role === 'buyer' ? profile.role : 'buyer';
       setRole(role);
       toast.success(t('auth.loginSuccess'));
-      navigate(role === 'farmer' ? '/farmer-dashboard' : '/buyer-dashboard');
+      navigate(role === 'farmer' ? '/farmer/dashboard' : '/buyer/dashboard');
     } catch (err: unknown) {
       console.error('Unexpected login error:', err);
       toast.error('Something went wrong. Please try again.');

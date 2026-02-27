@@ -104,7 +104,8 @@ const Chatbot = () => {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-border flex gap-2">
+            <div className="p-3 border-t border-border flex items-center gap-2">
+              <VoiceAssistant />
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -119,7 +120,6 @@ const Chatbot = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      {open && <VoiceAssistant />}
     </>
   );
 };

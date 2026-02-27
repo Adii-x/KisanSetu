@@ -99,14 +99,14 @@ const VoiceAssistant = () => {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={startListening}
-      className={`fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${
+      className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-colors ${
         listening
           ? 'bg-destructive text-destructive-foreground animate-pulse'
           : 'bg-secondary text-secondary-foreground glow-pulse'
       }`}
       title={listening ? t('voice.listening') : t('voice.speak')}
     >
-      {listening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+      {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
     </motion.button>
   );
 };

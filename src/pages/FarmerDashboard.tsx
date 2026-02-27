@@ -1,27 +1,73 @@
-import { useState, useEffect, DragEvent, ChangeEvent } from 'react';
+import { useState, useEffect, useCallback, DragEvent, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Package, IndianRupee, TrendingUp, ShoppingBag, X } from 'lucide-react';
-import { mockProducts, Product, mockOrders, monthlyData } from '@/data/mockData';
+import { Product, mockOrders, monthlyData } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useUserRole } from '@/context/UserRoleContext';
 
+const DEFAULT_PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400';
+
+type ProductRow = {
+  id: string;
+  farmer_id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  category: string | null;
+  unit: string | null;
+  image_url: string | null;
+  created_at: string;
+};
+
+function mapRowToProduct(row: ProductRow): Product {
+  return {
+    id: row.id,
+    name: row.name,
+    price: Number(row.price),
+    quantity: row.quantity ?? 0,
+    category: row.category ?? 'vegetables',
+    image: row.image_url ?? DEFAULT_PLACEHOLDER_IMAGE,
+    farmer: 'You',
+    unit: row.unit ?? 'kg',
+  };
+}
+
 const FarmerDashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { setRole } = useUserRole();
   const [authLoading, setAuthLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>(mockProducts.slice(0, 4));
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
-  const placeholderImages = mockProducts.map(p => p.image);
+  const fetchProducts = useCallback(async (farmerId: string) => {
+    setProductsLoading(true);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('farmer_id', farmerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Fetch products error:', error);
+      toast.error(error.message ?? 'Failed to load products.');
+      setProducts([]);
+    } else {
+      setProducts((data ?? []).map(mapRowToProduct));
+    }
+    setProductsLoading(false);
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,7 +76,7 @@ const FarmerDashboard = () => {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        navigate('/login?mode=login');
+        navigate('/login');
         return;
       }
 
@@ -41,22 +87,26 @@ const FarmerDashboard = () => {
         .single();
 
       if (error || !profile?.role) {
-        navigate('/select-role?mode=signup');
+        console.error('Profile fetch error on farmer dashboard:', error);
+        toast.error('Profile not found. Please complete registration.');
+        navigate('/register');
         return;
       }
 
       if (profile.role !== 'farmer') {
         setRole(profile.role);
-        navigate('/marketplace');
+        navigate('/buyer-dashboard');
         return;
       }
 
       setRole('farmer');
+      setCurrentUserId(user.id);
       setAuthLoading(false);
+      await fetchProducts(user.id);
     };
 
     void checkAuth();
-  }, [navigate, setRole]);
+  }, [navigate, setRole, fetchProducts]);
 
   const stats = [
     { icon: IndianRupee, label: t('analytics.totalSales'), value: '₹31,000', color: 'text-primary' },
@@ -65,8 +115,14 @@ const FarmerDashboard = () => {
     { icon: TrendingUp, label: t('analytics.growth'), value: '+24%', color: 'text-krishi-leaf' },
   ];
 
-  const handleDelete = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) {
+      console.error('Delete product error:', error);
+      toast.error(error.message ?? t('dashboard.delete') + ' failed.');
+      return;
+    }
+    if (currentUserId) await fetchProducts(currentUserId);
     toast.success(t('dashboard.productDeleted'));
   };
 
@@ -77,40 +133,63 @@ const FarmerDashboard = () => {
     setShowAddModal(true);
   };
 
-  const handleSave = () => {
-    if (!form.name || !form.price || !form.quantity) {
+  const handleSave = async () => {
+    if (!form.name?.trim() || !form.price?.trim() || !form.quantity?.trim()) {
       toast.error(t('dashboard.fillAll'));
       return;
     }
-    if (editProduct) {
-      setProducts(prev => prev.map(p => p.id === editProduct.id ? {
-        ...p,
-        name: form.name,
-        price: Number(form.price),
-        quantity: Number(form.quantity),
-        category: form.category,
-        unit: form.unit,
-        image: imagePreview || p.image,
-      } : p));
-      toast.success(t('dashboard.productUpdated'));
-    } else {
-      const newProduct: Product = {
-        id: Date.now().toString(),
-        name: form.name,
-        price: Number(form.price),
-        quantity: Number(form.quantity),
-        category: form.category,
-        image: imagePreview || placeholderImages[Math.floor(Math.random() * placeholderImages.length)] || '🌾',
-        farmer: 'You',
-        unit: form.unit,
-      };
-      setProducts(prev => [newProduct, ...prev]);
-      toast.success(t('dashboard.productAdded'));
+    if (!currentUserId) return;
+    const priceNum = Number(form.price);
+    const quantityNum = Math.max(0, Math.floor(Number(form.quantity)));
+    if (Number.isNaN(priceNum) || priceNum < 0) {
+      toast.error(t('dashboard.price') + ' must be a valid number.');
+      return;
     }
-    setShowAddModal(false);
-    setEditProduct(null);
-    setForm({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' });
-    setImagePreview(null);
+
+    setSaveLoading(true);
+    try {
+      if (editProduct) {
+        const { error } = await supabase
+          .from('products')
+          .update({
+            name: form.name.trim(),
+            price: priceNum,
+            quantity: quantityNum,
+            category: form.category,
+            unit: form.unit,
+            image_url: imagePreview || null,
+          })
+          .eq('id', editProduct.id)
+          .eq('farmer_id', currentUserId);
+
+        if (error) throw error;
+        toast.success(t('dashboard.productUpdated'));
+      } else {
+        const { error } = await supabase.from('products').insert({
+          farmer_id: currentUserId,
+          name: form.name.trim(),
+          price: priceNum,
+          quantity: quantityNum,
+          category: form.category,
+          unit: form.unit,
+          image_url: imagePreview || null,
+        });
+
+        if (error) throw error;
+        toast.success(t('dashboard.productAdded'));
+      }
+      await fetchProducts(currentUserId);
+      setShowAddModal(false);
+      setEditProduct(null);
+      setForm({ name: '', price: '', quantity: '', category: 'vegetables', unit: 'kg' });
+      setImagePreview(null);
+    } catch (err: unknown) {
+      console.error('Save product error:', err);
+      const msg = err && typeof err === 'object' && 'message' in err ? String((err as { message: unknown }).message) : null;
+      toast.error(msg ?? (editProduct ? 'Update failed.' : 'Failed to add product.'));
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const handleImageFile = (file: File | null) => {
@@ -196,7 +275,10 @@ const FarmerDashboard = () => {
             </motion.button>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {products.map((product, i) => (
+            {productsLoading ? (
+              <p className="text-muted-foreground col-span-full">Loading products…</p>
+            ) : (
+              products.map((product, i) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -209,6 +291,7 @@ const FarmerDashboard = () => {
                     src={product.image}
                     alt={product.name}
                     className="w-full h-32 object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PLACEHOLDER_IMAGE; }}
                   />
                 </div>
                 <h3 className="font-semibold text-foreground">{product.name}</h3>
@@ -218,12 +301,13 @@ const FarmerDashboard = () => {
                   <button onClick={() => handleEdit(product)} className="flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
                     <Edit2 className="h-3 w-3" /> {t('dashboard.edit')}
                   </button>
-                  <button onClick={() => handleDelete(product.id)} className="flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                  <button onClick={() => void handleDelete(product.id)} className="flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                     <Trash2 className="h-3 w-3" /> {t('dashboard.delete')}
                   </button>
                 </div>
               </motion.div>
-            ))}
+            ))
+            )}
           </div>
         </div>
 
@@ -322,8 +406,15 @@ const FarmerDashboard = () => {
                     <option key={c} value={c}>{t(`marketplace.${c}`)}</option>
                   ))}
                 </select>
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleSave} className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold btn-glow">
-                  {editProduct ? t('dashboard.save') : t('dashboard.addProduct')}
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => void handleSave()}
+                  disabled={saveLoading}
+                  className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold btn-glow disabled:opacity-60"
+                >
+                  {saveLoading ? 'Saving…' : editProduct ? t('dashboard.save') : t('dashboard.addProduct')}
                 </motion.button>
               </div>
             </motion.div>

@@ -49,7 +49,7 @@ const HeroSection = () => {
               {t('hero.subtext')}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link to="/select-role?mode=signup">
+              <Link to="/register">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -329,7 +329,7 @@ const HeroSection = () => {
             {t('landing.finalCta.title')}
           </h2>
           <div className="flex flex-wrap gap-4 justify-center mt-4">
-            <Link to="/select-role?mode=signup">
+            <Link to="/register">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

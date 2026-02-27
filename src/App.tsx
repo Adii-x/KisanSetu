@@ -12,8 +12,10 @@ import Community from "./pages/Community";
 import Analytics from "./pages/Analytics";
 import Orders from "./pages/Orders";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import RoleSelection from "./pages/RoleSelection";
 import FarmerDashboard from "./pages/FarmerDashboard";
+import BuyerDashboard from "./pages/BuyerDashboard";
 import NotFound from "./pages/NotFound";
 import "@/i18n";
 
@@ -34,7 +36,10 @@ const App = () => (
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/select-role" element={<RoleSelection />} />
+              <Route path="/farmer-dashboard" element={<FarmerDashboard />} />
+              <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
               <Route path="/dashboard" element={<FarmerDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

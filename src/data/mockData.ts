@@ -10,7 +10,7 @@ export interface Product {
 }
 
 export const mockProducts: Product[] = [
-  { id: '1', name: 'Organic Tomatoes', price: 40, quantity: 500, category: 'vegetables', image: 'https://www.istockphoto.com/photos/red-tomato', farmer: 'Rajesh Kumar', unit: 'kg' },
+  { id: '1', name: 'Organic Tomatoes', price: 40, quantity: 500, category: 'vegetables', image: 'C:\Users\eshwa\OneDrive\Pictures\Tomatoes.webp', farmer: 'Rajesh Kumar', unit: 'kg' },
   { id: '2', name: 'Basmati Rice', price: 120, quantity: 1000, category: 'grains', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400', farmer: 'Suresh Patil', unit: 'kg' },
   { id: '3', name: 'Fresh Mangoes', price: 80, quantity: 300, category: 'fruits', image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400', farmer: 'Anita Devi', unit: 'kg' },
   { id: '4', name: 'Green Chillies', price: 30, quantity: 200, category: 'spices', image: 'https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=400', farmer: 'Mohan Singh', unit: 'kg' },

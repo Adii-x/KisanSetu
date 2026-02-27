@@ -10,12 +10,14 @@ export interface Product {
 }
 
 export const mockProducts: Product[] = [
-  { id: '1', name: 'Organic Tomatoes', price: 40, quantity: 500, category: 'vegetables', image: 'C:\Users\eshwa\OneDrive\Pictures\Tomatoes.webp', farmer: 'Rajesh Kumar', unit: 'kg' },
+  { id: '1', name: 'Organic Tomatoes', price: 40, quantity: 500, category: 'vegetables', image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400'
+, farmer: 'Rajesh Kumar', unit: 'kg' },
   { id: '2', name: 'Basmati Rice', price: 120, quantity: 1000, category: 'grains', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400', farmer: 'Suresh Patil', unit: 'kg' },
   { id: '3', name: 'Fresh Mangoes', price: 80, quantity: 300, category: 'fruits', image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400', farmer: 'Anita Devi', unit: 'kg' },
   { id: '4', name: 'Green Chillies', price: 30, quantity: 200, category: 'spices', image: 'https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=400', farmer: 'Mohan Singh', unit: 'kg' },
   { id: '5', name: 'Fresh Milk', price: 60, quantity: 100, category: 'dairy', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400', farmer: 'Lakshmi Farms', unit: 'L' },
-  { id: '6', name: 'Organic Potatoes', price: 25, quantity: 800, category: 'vegetables', image: 'https://images.unsplash.com/photo-1518977676601-b53f82ber633?w=400', farmer: 'Ramesh Yadav', unit: 'kg' },
+  { id: '6', name: 'Organic Potatoes', price: 25, quantity: 800, category: 'vegetables', image: 'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400'
+, farmer: 'Ramesh Yadav', unit: 'kg' },
   { id: '7', name: 'Turmeric Powder', price: 200, quantity: 150, category: 'spices', image: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=400', farmer: 'Priya Sharma', unit: 'kg' },
   { id: '8', name: 'Fresh Bananas', price: 35, quantity: 400, category: 'fruits', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400', farmer: 'Vijay Reddy', unit: 'dozen' },
   { id: '9', name: 'Wheat Flour', price: 45, quantity: 600, category: 'grains', image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400', farmer: 'Geeta Devi', unit: 'kg' },

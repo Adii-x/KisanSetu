@@ -42,7 +42,8 @@ const HeroSection = () => {
               <Sprout className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">KisanSetu</span>
             </div>
-            <h1 className="px-3 sm:px-0 text-5xl md:text-5xl lg:text-5xl font-extrabold leading-[1.2] mb-6 pb-2 gradient-text break-words">
+            <h1 className="px-3 sm:px-0 text-5xl font-extrabold leading-[1.2] mb-6 pb-2 gradient-text break-words">
+
 
               {t('hero.headline')}
             </h1>

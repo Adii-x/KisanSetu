@@ -5,6 +5,7 @@ import { Mail, Lock, User, Sprout, Tractor, ShoppingBag, Leaf, TrendingUp, Users
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUserRole } from '@/context/UserRoleContext';
+import { supabase } from '@/lib/supabaseClient';
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -12,22 +13,89 @@ const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') || 'login';
   const [isLogin, setIsLogin] = useState(mode !== 'signup');
-  const { role: userRole } = useUserRole();
+  const { role: userRole, setRole } = useUserRole();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const isFarmer = userRole === 'farmer';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!email || !password || (!isLogin && !name)) {
       toast.error('Please fill all fields');
       return;
     }
-    toast.success(isLogin ? t('auth.loginSuccess') : t('auth.registerSuccess'));
-    navigate(isFarmer ? '/dashboard' : '/marketplace');
+
+    setLoading(true);
+    const selectedRole = isFarmer ? 'farmer' : 'buyer';
+
+    if (!email || !password) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        // Login flow
+        const {
+          data: { user },
+          error: signInError,
+        } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (signInError) throw signInError;
+        if (!user) throw new Error('Login succeeded but user is null');
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        const role = profile?.role === 'farmer' || profile?.role === 'buyer' ? profile.role : selectedRole;
+        setRole(role);
+
+        toast.success(t('auth.loginSuccess'));
+        navigate(role === 'farmer' ? '/dashboard' : '/marketplace');
+      } else {
+        // Signup flow
+        const {
+          data: { user },
+          error: signUpError,
+        } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name },
+          },
+        });
+
+        if (signUpError) throw signUpError;
+        if (!user) throw new Error('Signup succeeded but user is null');
+
+        const role = selectedRole;
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({ id: user.id, role });
+
+        if (profileError) throw profileError;
+
+        setRole(role);
+        toast.success(t('auth.registerSuccess'));
+        navigate(role === 'farmer' ? '/dashboard' : '/marketplace');
+      }
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      toast.error(err.message ?? 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const farmerFeatures = [
@@ -146,9 +214,16 @@ const LoginPage = () => {
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold btn-glow"
+              disabled={loading}
+              className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold btn-glow disabled:opacity-60"
             >
-              {isLogin ? t('auth.login') : t('auth.register')}
+              {loading
+                ? isLogin
+                  ? 'Signing in...'
+                  : 'Creating account...'
+                : isLogin
+                ? t('auth.login')
+                : t('auth.register')}
             </motion.button>
           </form>
 

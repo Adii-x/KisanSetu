@@ -1,13 +1,19 @@
-import { useState, DragEvent, ChangeEvent } from 'react';
+import { useState, useEffect, DragEvent, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Package, IndianRupee, TrendingUp, ShoppingBag, X } from 'lucide-react';
 import { mockProducts, Product, mockOrders, monthlyData } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabaseClient';
+import { useUserRole } from '@/context/UserRoleContext';
 
 const FarmerDashboard = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { setRole } = useUserRole();
+  const [authLoading, setAuthLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>(mockProducts.slice(0, 4));
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
@@ -16,6 +22,41 @@ const FarmerDashboard = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const placeholderImages = mockProducts.map(p => p.image);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        navigate('/login?mode=login');
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !profile?.role) {
+        navigate('/select-role?mode=signup');
+        return;
+      }
+
+      if (profile.role !== 'farmer') {
+        setRole(profile.role);
+        navigate('/marketplace');
+        return;
+      }
+
+      setRole('farmer');
+      setAuthLoading(false);
+    };
+
+    void checkAuth();
+  }, [navigate, setRole]);
 
   const stats = [
     { icon: IndianRupee, label: t('analytics.totalSales'), value: '₹31,000', color: 'text-primary' },
@@ -109,6 +150,14 @@ const FarmerDashboard = () => {
   };
 
   const farmerOrders = mockOrders.slice(0, 3);
+
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 min-h-screen">
+        <p className="text-muted-foreground">Loading your farmer dashboard…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">

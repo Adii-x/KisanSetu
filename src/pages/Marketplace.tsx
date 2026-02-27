@@ -342,18 +342,18 @@ const MarketplacePage = () => {
         </div>
 
         <div>
-          <p className="text-sm font-semibold mb-2">Price Range</p>
-          <p className="text-xs text-muted-foreground mb-2">
+          <p className="text-base font-semibold mb-1.5">Price Range</p>
+          <p className="text-sm text-muted-foreground mb-3">
             ₹{priceRange[0]} — ₹{priceRange[1]}
           </p>
-          <div className="flex items-center gap-3">
+          <div className="space-y-2">
             <input
               type="range"
               min={MIN_PRICE}
               max={MAX_PRICE}
               value={priceRange[0]}
               onChange={(e) => handlePriceChange(0, Number(e.target.value))}
-              className="flex-1 accent-emerald-600"
+              className="w-full accent-emerald-600"
             />
             <input
               type="range"
@@ -361,7 +361,7 @@ const MarketplacePage = () => {
               max={MAX_PRICE}
               value={priceRange[1]}
               onChange={(e) => handlePriceChange(1, Number(e.target.value))}
-              className="flex-1 accent-emerald-600"
+              className="w-full accent-emerald-600"
             />
           </div>
         </div>

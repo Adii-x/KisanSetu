@@ -32,7 +32,7 @@ Due to these issues, farmers are sometimes compelled to sell their produce at lo
 
 There is a need for a digital, transparent, and accessible platform that empowers farmers with better market visibility, faster transactions, and direct communication with buyers — ultimately helping them achieve fair value for their produce.
 
-🛠 Tech Stack
+## 🛠 Tech Stack
 Component	Technology Used:-
 
 Frontend:	JavaScript, React
@@ -185,5 +185,6 @@ Real-time demand prediction using AI
 ## 🌱 Vision
 
 To create a transparent, inclusive, and technology-driven agricultural marketplace that empowers farmers and strengthens India's agricultural ecosystem.
+
 
 

@@ -22,7 +22,7 @@ import BuyerDashboardPage from "./pages/buyer/BuyerDashboardPage";
 import BuyerMarketplacePage from "./pages/buyer/BuyerMarketplacePage";
 import BuyerOrdersPage from "./pages/buyer/BuyerOrdersPage";
 import CartPage from "./pages/buyer/CartPage";
-import WishlistPage from "./pages/buyer/WishlistPage";
+
 import BuyerSettingsPage from "./pages/buyer/BuyerSettingsPage";
 import FarmerProductsPage from "./pages/farmer/FarmerProductsPage";
 import FarmerOrdersPage from "./pages/farmer/FarmerOrdersPage";
@@ -66,7 +66,7 @@ const App = () => (
                 <Route path="marketplace" element={<BuyerMarketplacePage />} />
                 <Route path="orders" element={<BuyerOrdersPage />} />
                 <Route path="cart" element={<CartPage />} />
-                <Route path="wishlist" element={<WishlistPage />} />
+
                 <Route path="settings" element={<BuyerSettingsPage />} />
                 <Route index element={<Navigate to="/buyer/dashboard" replace />} />
               </Route>

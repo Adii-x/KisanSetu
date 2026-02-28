@@ -5,7 +5,6 @@ import {
   Store,
   Package,
   ShoppingCart,
-  Heart,
   Settings,
   LogOut,
   Sprout,
@@ -14,13 +13,13 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useUserRole } from '@/context/UserRoleContext';
+import BuyerChatbot from '@/components/BuyerChatbot';
 
 const navItems = [
   { to: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: 'marketplace', label: 'Marketplace', icon: Store },
   { to: 'orders', label: 'My Orders', icon: Package },
   { to: 'cart', label: 'Cart', icon: ShoppingCart },
-  { to: 'wishlist', label: 'Wishlist', icon: Heart },
   { to: 'settings', label: 'Settings', icon: Settings },
 ] as const;
 
@@ -129,10 +128,9 @@ const BuyerLayout = () => {
               to={`/buyer/${to}`}
               end={to === 'dashboard'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                 }`
               }
               onClick={() => setSidebarOpen(false)}
@@ -171,6 +169,9 @@ const BuyerLayout = () => {
           <Outlet />
         </div>
       </main>
+
+      {/* Buyer-only chatbot — renders only when role === 'buyer' */}
+      <BuyerChatbot />
     </div>
   );
 };

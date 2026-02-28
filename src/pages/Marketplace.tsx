@@ -588,7 +588,7 @@ const MarketplacePage = () => {
                 <div>
                   <p className="font-semibold text-foreground mb-1">No products listed yet</p>
                   <p className="text-sm text-muted-foreground max-w-md">
-                    Farmers haven&apos;t added any products to the marketplace yet, or the products table may be empty. If you&apos;ve set up Supabase, ensure the &quot;products&quot; table has RLS policies that allow buyers to select rows (e.g. run the script in <code className="text-xs bg-muted px-1 rounded">supabase/products_rls_buyers.sql</code>).
+                    Products appear here as soon as farmers add them. Run <code className="text-xs bg-muted px-1 rounded">supabase/mvp_products_setup.sql</code> in the Supabase SQL Editor once so buyers can see all products.
                   </p>
                 </div>
               </div>
